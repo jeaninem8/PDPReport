@@ -1,5 +1,7 @@
 #create complete report without filling in the AAs summer 2020
 
+# NOTE: to successfully run, home folder must contain PDF Full Reports folder and Cover Pages folder where the files will output to
+
 #load libraries
 library(dplyr)
 library(tidyr)
@@ -21,8 +23,7 @@ library(plotrix)
 library(chron)
 
 #location of static pages within report
-setwd("/Volumes/My Passport/PDP Report Fall 2020")
-#setwd("/Volumes/My Passport/PDP Sample Folder/Static Pages")
+setwd("/Documents/Static Pages")
 
 #static PDF pages for report
 HMdoc <- image_read_pdf("RapsodoHittingMetricDefinitions.pdf")
@@ -33,20 +34,19 @@ noTest <- image_read("DidNotTest.png")
 
 
 #location of data files for event (home folder)
-setwd("/Volumes/My Passport/NCCU 10.2.20/Run 2")
-#setwd("/Volumes/My Passport/PDP Sample Folder")
+setwd("/Documents/PDPReport")
 
 # ADD EMPTY FOLDERS : COVER PAGES and PDF FULL REPORTS
 
 #collected event data - all files in this section muct be Excel files
-internal <- read_excel(path = "NCCU Run 2Durham, NCInternal.xlsx", col_names = TRUE) #internal
-CMJ <- read_excel(path="NCCUcmjext2.xlsx") #CMJ extended
-drift <- read_excel("NCCU2dextended2.xlsx",col_names = TRUE) #2D extended
-Gaittest <- read_excel(path="NCCUgait2.xlsx", sheet="OJ Data",col_names = TRUE) #gait
-DriftProtocol <- read_excel(path="NCCU2dsimple2.xlsx",sheet="Protocol data",skip = 1,col_names = FALSE) #2D simple
-RapHit <- read_excel(path = "States Play 2019Miami, FLRapsodoHittingMaster.xlsx", col_names = TRUE) #rapsodo hitting
-DK <- read_excel(path = "States Play DK Master.xlsx", col_names = TRUE) # DK
-RapPitch <- read_excel(path = "States Play 2019Miami, FLRapsodoPitchingMaster.xlsx", col_names = TRUE) #rapsodo pitching
+internal <- read_excel(path = "sampleInternal.xlsx", col_names = TRUE) #internal
+CMJ <- read_excel(path="sampleCMJExt.xlsx") #CMJ extended
+drift <- read_excel("sample2DDriftExt.xlsx",col_names = TRUE) #2D extended
+Gaittest <- read_excel(path="sampleGait.xlsx", sheet="OJ Data",col_names = TRUE) #gait
+DriftProtocol <- read_excel(path="sample2DDriftSimple.xlsx",sheet="Protocol data",skip = 1,col_names = FALSE) #2D simple
+RapHit <- read_excel(path = "sampleRapsodoHittingMaster.xlsx", col_names = TRUE) #rapsodo hitting
+DK <- read_excel(path = "sampleDKMaster.xlsx", col_names = TRUE) # DK
+RapPitch <- read_excel(path = "sampleRapsodoPitchingMaster.xlsx", col_names = TRUE) #rapsodo pitching
 
 #reformatting/clean up of the internal sheet
 internal$`Reaction to Go (sec)` <- na_if(internal$`Reaction to Go (sec)`, "-")
@@ -91,6 +91,7 @@ DK$firstAndLast <- paste(DK$`First Name`, DK$`Last Name`, sep = "")
 EventAverages <- data.frame("Last Name" = "Event Averages", "Green Box" = mean(as.numeric(internal$`Green Box`), na.rm = TRUE), "Green 3" = mean(as.numeric(internal$`Green 3`), na.rm = TRUE), "Agility Diff" = mean(as.numeric(internal$`Agility Diff`), na.rm = TRUE), "% Change" = mean(as.numeric(internal$`% Change`), na.rm = TRUE), "Reaction" = mean(as.numeric(internal$`Reaction to Go (sec)`), na.rm = TRUE), "10 yd" = mean(as.numeric(internal$`10 yd split (sec)`), na.rm = TRUE), "30 yd" = mean(as.numeric(internal$`30 Total`), na.rm = TRUE), "Hawkeye" = mean(as.numeric(internal$Hawkeye), na.rm = TRUE), "CMJ.GCT.sec." = mean(as.numeric(internal$`CMJ GCT[sec]`), na.rm = TRUE), "CMJ.Height.in." = mean(as.numeric(internal$`CMJ Height[in]`), na.rm = TRUE), "CMJ.Power..W.Kg." = mean(as.numeric(internal$`CMJ Power [W/Kg]`), na.rm = TRUE), "BJ.GCT.sec." = mean(as.numeric(internal$`BJ GCT[sec]`), na.rm = TRUE), "BJ.Power.W.Kg." = mean(as.numeric(internal$`BJ Power[W/Kg]`), na.rm = TRUE), "BJ.Distance..ft." = mean(as.numeric(internal$`BJ Distance (ft)`), na.rm = TRUE))
 EventAverages[,2:15] <- as.numeric(EventAverages[,2:15])
 
+# use below if no reaction time collected
 # EventAverages <- data.frame("Last Name" = "Event Averages", "Green Box" = mean(as.numeric(internal$`Green Box`), na.rm = TRUE), "Green 3" = mean(as.numeric(internal$`Green 3`), na.rm = TRUE), "Agility Diff" = mean(as.numeric(internal$`Agility Diff`), na.rm = TRUE), "% Change" = mean(as.numeric(internal$`% Change`), na.rm = TRUE), "10 yd" = mean(as.numeric(internal$`ISO 10`), na.rm = TRUE), "30 yd" = mean(as.numeric(internal$`ISO 30`), na.rm = TRUE), "Hawkeye" = mean(as.numeric(internal$Hawkeye), na.rm = TRUE), "CMJ.GCT.sec." = mean(as.numeric(internal$`CMJ GCT[sec]`), na.rm = TRUE), "CMJ.Height.in." = mean(as.numeric(internal$`CMJ Height[in]`), na.rm = TRUE), "CMJ.Power..W.Kg." = mean(as.numeric(internal$`CMJ Power [W/Kg]`), na.rm = TRUE), "BJ.GCT.sec." = mean(as.numeric(internal$`BJ GCT[sec]`), na.rm = TRUE), "BJ.Power.W.Kg." = mean(as.numeric(internal$`BJ Power[W/Kg]`), na.rm = TRUE), "BJ.Distance..ft." = mean(as.numeric(internal$`BJ Distance (ft)`), na.rm = TRUE))
 # EventAverages[,2:14] <- as.numeric(EventAverages[,2:14])
 
@@ -103,7 +104,7 @@ DKAverages <- data.frame("Last Name" = "Event Averages", "Max Barrel Speed" = me
 DKAverages[,2:8] <- as.numeric(DKAverages[,2:8])
 
 ###### start of loop for entire report creation ######
-for (i in 1:3) { #for all- "i in 1:nrow(internal)"; for some- "i in 1:5" or "i in 1:27"...etc
+for (i in 1:nrow(internal) { #for all- "i in 1:nrow(internal)"; for some- "i in 1:5" or "i in 1:27"...etc
   indPlayerData <- subset(internal[i,])
   
   #pull Green Box Green 3 testing information & reformat for output
@@ -279,49 +280,48 @@ for (i in 1:3) { #for all- "i in 1:nrow(internal)"; for some- "i in 1:5" or "i i
 
 
   #### EDIT EVENT NAME (update 8.13.20 to only make cover pages with no HWG)
-  # if (is.na(indPlayerData$`Height (in)`) & is.na(indPlayerData$Weight) & is.na(indPlayerData$`LEFT DOWN`)) {
-  #   COVdoc <- image_read_pdf("E:/PR Walkthrough 8.28.20/Static Pages/CoverPageBlankNoHWG.pdf")
-  #   #COVdoc <- image_read_pdf("/Volumes/My Passport/PDP Sample Folder/Static Pages/CoverPageBlankNoHWG.pdf")
-  #   COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`Last Name`), font = "DIN", size = 75, color = "white", location = "+500+2640")
-  #   COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`First Name`), font = "DIN", size = 175, color = "white", location = "+500+2480")
-  #   # CHANGE LOCATION (ALIGNMENT)
-  #   COVdoc <- image_annotate(COVdoc, "PDP SAMPLE REPORT", font = "DIN", size = 100, color = "white", location = "+1430+100")
-  #   COVdoc <- image_annotate(COVdoc, format(indPlayerData$Date, "%m.%d.%y"), font = "DIN Condensed", size = 100, color = "white", location = "+2110+100")
-  #   image_write(COVdoc,path=paste0("Cover Pages/", internal$`Last Name`[i],internal$`First Name`[i],"Cover.pdf"), format="pdf", quality = 100, density = 300)
-  # }
+  if (is.na(indPlayerData$`Height (in)`) & is.na(indPlayerData$Weight) & is.na(indPlayerData$`LEFT DOWN`)) {
+    COVdoc <- image_read_pdf("Documents/Static Pages/CoverPageBlankNoHWG.pdf")
+    COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`Last Name`), font = "DIN", size = 75, color = "white", location = "+500+2640")
+    COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`First Name`), font = "DIN", size = 175, color = "white", location = "+500+2480")
+    # CHANGE LOCATION (ALIGNMENT)
+    COVdoc <- image_annotate(COVdoc, "PDP SAMPLE REPORT", font = "DIN", size = 100, color = "white", location = "+1430+100")
+    COVdoc <- image_annotate(COVdoc, format(indPlayerData$Date, "%m.%d.%y"), font = "DIN Condensed", size = 100, color = "white", location = "+2110+100")
+    image_write(COVdoc,path=paste0("Cover Pages/", internal$`Last Name`[i],internal$`First Name`[i],"Cover.pdf"), format="pdf", quality = 100, density = 300)
+  }
   
-  COVdoc <- image_read_pdf("/Volumes/My Passport/PDP Report Fall 2020/CoverPageBlankNoHWG.pdf")
-  COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`Last Name`), font = "DIN Condensed", size = 275, color = "white", location = "+500+2640")
-  COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`First Name`), font = "DIN Condensed", size = 175, color = "white", location = "+500+2480")
-  # CHANGE LOCATION (ALIGNMENT) 
-  COVdoc <- image_annotate(COVdoc, "NORTH CAROLINA CENTRAL - RUN 2", font = "DIN Condensed", size = 100, color = "white", location = "+985+100")
-  #COVdoc <- image_annotate(COVdoc, format(indPlayerData$Date, "%m.%d.%y"), font = "DIN Condensed", size = 100, color = "white", location = "+2110+100")
-  COVdoc <- image_annotate(COVdoc, '10.02.20', font = "DIN Condensed", size = 100, color = "white", location = "+2110+100")
-  image_write(COVdoc,path=paste0("Cover Pages/", internal$`Last Name`[i],internal$`First Name`[i],"Cover.pdf"), format="pdf", quality = 100, density = 300)
+  # use below if want only name on cover
+  # COVdoc <- image_read_pdf("/Documents/Static Pages/CoverPageBlankNoHWG.pdf")
+  # COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`Last Name`), font = "DIN Condensed", size = 275, color = "white", location = "+500+2640")
+  # COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`First Name`), font = "DIN Condensed", size = 175, color = "white", location = "+500+2480")
+  # # CHANGE LOCATION (ALIGNMENT) 
+  # COVdoc <- image_annotate(COVdoc, "PDP SAMPLE REPORT", font = "DIN Condensed", size = 100, color = "white", location = "+1430+100")
+  # #COVdoc <- image_annotate(COVdoc, format(indPlayerData$Date, "%m.%d.%y"), font = "DIN Condensed", size = 100, color = "white", location = "+2110+100")
+  # COVdoc <- image_annotate(COVdoc, '10.02.20', font = "DIN Condensed", size = 100, color = "white", location = "+2110+100")
+  # image_write(COVdoc,path=paste0("Cover Pages/", internal$`Last Name`[i],internal$`First Name`[i],"Cover.pdf"), format="pdf", quality = 100, density = 300)
   
 
-  # if (!is.na(indPlayerData$`Height (in)`) | !is.na(indPlayerData$Weight) | !is.na(indPlayerData$`LEFT DOWN`)) {
-  #   #COVdoc <- image_read_pdf("/Volumes/My Passport/PR Walkthrough 8.28.20/Static Pages/CoverPageBlank.pdf")
-  #   COVdoc <- image_read_pdf("/Volumes/My Passport/PDP Sample Folder/Static Pages/CoverPageBlank.pdf")
-  #   COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`Last Name`), font = "DIN Condensed", size = 400, color = "white", location = "+400+665")
-  #   COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`First Name`), font = "DIN Condensed", size = 250, color = "white", location = "+400+445")
-  #   # CHANGE LOCATION (ALIGNMENT)
-  #   COVdoc <- image_annotate(COVdoc, "PDP SAMPLE REPORT", font = "DIN Condensed", size = 100, color = "white", location = "+1430+100")
-  #   COVdoc <- image_annotate(COVdoc, format(indPlayerData$Date, "%m.%d.%y"), font = "DIN Condensed", size = 100, color = "white", location = "+2110+100")
-  #   COVdoc <- image_annotate(COVdoc, paste0(round(indPlayerData$`Height (in)`, 2), " IN"), font = "DIN Condensed", size = 115, color = "white", location = "+674+2685")
-  #   COVdoc <- image_annotate(COVdoc, paste0(indPlayerData$Weight, " LBS"), font = "DIN Condensed", size = 115, color = "white", location = "+998+2685")
-  #   COVdoc <- image_annotate(COVdoc, indPlayerData$`RIGHT DOWN`, font = "DIN Condensed", size = 90, color = "white", location = "+1760+2580")
-  #   COVdoc <- image_annotate(COVdoc, indPlayerData$`RIGHT 90`, font = "DIN Condensed", size = 90, color = "white", location = "+1760+2678")
-  #   COVdoc <- image_annotate(COVdoc, indPlayerData$`RIGHT UP`, font = "DIN Condensed", size = 90, color = "white", location = "+1760+2776")
-  #   COVdoc <- image_annotate(COVdoc, indPlayerData$`LEFT DOWN`, font = "DIN Condensed", size = 90, color = "white", location = "+2173+2580")
-  #   COVdoc <- image_annotate(COVdoc, indPlayerData$`LEFT 90`, font = "DIN Condensed", size = 90, color = "white", location = "+2173+2678")
-  #   COVdoc <- image_annotate(COVdoc, indPlayerData$`LEFT UP`, font = "DIN Condensed", size = 90, color = "white", location = "+2173+2776")
-  #   image_write(COVdoc,path=paste0("Cover Pages/", internal$`Last Name`[i],internal$`First Name`[i],"Cover.pdf"), format="pdf", quality = 100, density = 300)
-  # }
+  if (!is.na(indPlayerData$`Height (in)`) | !is.na(indPlayerData$Weight) | !is.na(indPlayerData$`LEFT DOWN`)) {
+    COVdoc <- image_read_pdf("/Documents/Static Pages/CoverPageBlank.pdf")
+    COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`Last Name`), font = "DIN Condensed", size = 400, color = "white", location = "+400+665")
+    COVdoc <- image_annotate(COVdoc, toupper(indPlayerData$`First Name`), font = "DIN Condensed", size = 250, color = "white", location = "+400+445")
+    # CHANGE LOCATION (ALIGNMENT)
+    COVdoc <- image_annotate(COVdoc, "PDP SAMPLE REPORT", font = "DIN Condensed", size = 100, color = "white", location = "+1430+100")
+    COVdoc <- image_annotate(COVdoc, format(indPlayerData$Date, "%m.%d.%y"), font = "DIN Condensed", size = 100, color = "white", location = "+2110+100")
+    COVdoc <- image_annotate(COVdoc, paste0(round(indPlayerData$`Height (in)`, 2), " IN"), font = "DIN Condensed", size = 115, color = "white", location = "+674+2685")
+    COVdoc <- image_annotate(COVdoc, paste0(indPlayerData$Weight, " LBS"), font = "DIN Condensed", size = 115, color = "white", location = "+998+2685")
+    COVdoc <- image_annotate(COVdoc, indPlayerData$`RIGHT DOWN`, font = "DIN Condensed", size = 90, color = "white", location = "+1760+2580")
+    COVdoc <- image_annotate(COVdoc, indPlayerData$`RIGHT 90`, font = "DIN Condensed", size = 90, color = "white", location = "+1760+2678")
+    COVdoc <- image_annotate(COVdoc, indPlayerData$`RIGHT UP`, font = "DIN Condensed", size = 90, color = "white", location = "+1760+2776")
+    COVdoc <- image_annotate(COVdoc, indPlayerData$`LEFT DOWN`, font = "DIN Condensed", size = 90, color = "white", location = "+2173+2580")
+    COVdoc <- image_annotate(COVdoc, indPlayerData$`LEFT 90`, font = "DIN Condensed", size = 90, color = "white", location = "+2173+2678")
+    COVdoc <- image_annotate(COVdoc, indPlayerData$`LEFT UP`, font = "DIN Condensed", size = 90, color = "white", location = "+2173+2776")
+    image_write(COVdoc,path=paste0("Cover Pages/", internal$`Last Name`[i],internal$`First Name`[i],"Cover.pdf"), format="pdf", quality = 100, density = 300)
+  }
 
 
   #read in blank AA and apply images to the pages
-  doc <- image_read_pdf("/Volumes/My Passport/PDP Report Fall 2020/AAReportBlank.pdf") # change to AAReportBlankNoGait.pdf if players have no gait
+  doc <- image_read_pdf("/Documents/Static Pages/AAReportBlank.pdf") # change to AAReportBlankNoGait.pdf if players have no gait
   page_num <- 0
 
   if ((!is.na(data1$`Agility Diff`[1]) & !is.na(data1$`Green 3`[1]) & !is.na(data1$`Green Box`[1])) | !is.na(indPlayerData$Hawkeye)) {
